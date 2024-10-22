@@ -1,0 +1,80 @@
+version: "3.7"
+services:
+  db: 
+    image: postgres:17.0
+    container_name: db_app
+    command: -p 5432
+    expose:
+      - 5432
+    env_file:
+      - .env-non-dev
+    volumes:
+     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+     - 5433:5432
+
+  redis:
+    image: redis:latest
+    container_name: redis_app
+    command: --port 6379
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: fastapi_app 
+    command: ["/fastapi_app/docker/app.sh"]
+    ports:
+      - 8000:8000
+    depends_on: 
+      - db
+      - redis
+
+
+  celery-worker:
+    build: 
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: celery_worker
+    command: ["/fastapi_app/docker/celery.sh"]
+    depends_on:       
+      - redis
+
+
+  flower:
+    build: 
+      context: .
+    container_name: flower_app
+    command: ["/fastapi_app/docker/flower.sh"]
+    depends_on:
+      - redis  
+      - celery-worker 
+    ports:
+      - 5555:5555
+
+
+  celery-beat:
+    build: 
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: celery_beat
+    command: ["/fastapi_app/docker/beat.sh"]
+    depends_on:       
+      - redis
+      - flower
+
+  # front:
+  #   build:
+  #     context: ./frontend
+  #   env_file:
+  #     - .env-non-dev
+  #   container_name: front_app 
+  #   ports:
+  #     - 5173:5173
+  #   depends_on: 
+  #     - app
+
+

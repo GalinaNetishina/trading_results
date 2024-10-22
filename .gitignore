@@ -1,0 +1,8 @@
+.env-non-dev
+.pytest_cache
+.ruff_cache
+.vscode
+__pycache__
+/venv
+/temp
+/frontend/node_modules

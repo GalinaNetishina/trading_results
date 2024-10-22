@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+pythonpath = [
+    '.', 'trading_result_app',
+]
+asyncio_mode='auto'
