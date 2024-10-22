@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schema import ItemDTO, ItemFull, TradingDay, ItemDateIdFilter, ItemIdFilter
+from schema import  ItemFull, TradingDay, ItemDateIdFilter, ItemIdFilter
 from database import get_async_session
 import repository as r
 from config import settings
@@ -30,7 +30,7 @@ async def get_trading_results(
     pag_params=Depends(get_pag_params),
     filter: ItemIdFilter = FilterDepends(ItemIdFilter),
     session: AsyncSession = Depends(get_async_session),
-) -> list[ItemDTO]:
+) -> list[ItemFull]:
     res = await r.ReadItemRepo.get_last(session, filter, **pag_params)
     return res
 
@@ -41,7 +41,7 @@ async def get_dynamics(
     pag_params=Depends(get_pag_params),
     filter: ItemIdFilter = FilterDepends(ItemDateIdFilter),
     session: AsyncSession = Depends(get_async_session),
-) -> list[ItemDTO]:
+) -> list[ItemFull]:
     res = await r.ReadItemRepo.get_many(session, filter, **pag_params)
     return res
 
@@ -101,18 +101,19 @@ async def db_load(
         expire_on_commit=False,
     )
     async with session_maker() as session:
-        after = "01.10.2024"
-        
+        after = "01.10.2024"        
         dates = await r.TradingDatesRepo.get_many(session, 1)
         if not dates:
             response = {"message": f"data after {after} loading"}
             dl = Downloader(after, partial(r.WriteItemRepo.add_many, session))
             tasks.add_task(dl.download)
+            await session.commit()
         elif dates and (datetime.today().date() - dates[0].date > timedelta(days=3)):
                 after = dates[0].date.strftime("%d.%m.%Y")
                 response = {"message": f"data after {after} loading"}
                 dl = Downloader(after, partial(r.WriteItemRepo.add_many, session))
                 tasks.add_task(dl.download)
+                await session.commit()
         else:
             response = {"message": f'data still fresh, last trading date = {dates[0].date.strftime("%d.%m.%Y")}'}
         return response
