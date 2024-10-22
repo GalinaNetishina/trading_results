@@ -10,8 +10,8 @@ docker compose build
 docker compose up
 ```
 
- ![api doc](api.png) 
- ![example](filters.png)
+ ![api doc](img/api.png) 
+ ![example](img/filters.png)
 
 
 ### запуск локально
@@ -43,7 +43,7 @@ docker compose up
     npm run dev
     ```
     ожидаемый результат:
-    ![screen](demo.png)
+    ![screen](img/demo.png)
    
 
 
