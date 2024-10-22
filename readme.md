@@ -10,6 +10,9 @@ docker compose build
 docker compose up
 ```
 
+ ![api doc](api.png) 
+ ![example](filters.png)
+
 
 ### запуск локально
  - создать venv и установить зависимости
@@ -41,5 +44,6 @@ docker compose up
     ```
     ожидаемый результат:
     ![screen](demo.png)
+   
 
 
