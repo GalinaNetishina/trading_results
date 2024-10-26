@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from trading_result_app.models import Base
+from trading_result_app.models.models import Base
 from trading_result_app.config import settings
 
 # this is the Alembic Config object, which provides

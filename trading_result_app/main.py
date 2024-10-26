@@ -9,7 +9,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi.middleware.cors import CORSMiddleware
 from redis import asyncio as aioredis
 
-from router import router as root
+from routers.router import router as root
 from config import settings
 
 logging.basicConfig(level=logging.DEBUG, format=" %(message)s")
@@ -29,6 +29,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Spimex Trading Results", lifespan=lifespan)
 app.include_router(root)
+app.state.redis = aioredis.from_url(
+    f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
+    encoding="utf8",
+    decode_responses=True,
+)
 
 origins = [
     f"http://{settings.FRONTEND_HOST}:{settings.FRONTEND_PORT}",
@@ -54,9 +59,8 @@ async def exception_handler(request: Request, exc: HTTPException):
 
 async def loading():
     from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-    from functools import partial
     from database import async_engine
-    import repository as r
+    from repos import repository as r
     from utils import Downloader
 
     session_maker = async_sessionmaker(
@@ -69,6 +73,8 @@ async def loading():
     async with session_maker() as session:
         after = "01.10.2024"
         logging.debug("data loading")
-        dl = Downloader(after, partial(r.WriteItemRepo.add_many, session))
+        dl = Downloader(after)
+        rep = r.WriteItemRepo(session)
         await dl.download()
-        await session.commit()
+        for dayresult in dl.output:
+            await rep.add_many(dayresult)

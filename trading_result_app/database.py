@@ -1,4 +1,3 @@
-from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 
 from config import settings
@@ -45,26 +44,3 @@ async def get_async_session():
 #     @classmethod
 #     async def add_many(cls, session, *args, **kwargs):
 #         ...
-
-
-class SQLAlchemyWriteRepo:
-    model = None
-
-    @classmethod
-    async def add_one(cls, data: dict):
-        async with session_maker() as session:
-            stmt = insert(cls.model).values(**data).returning(cls.model.id)
-            res = await session.execute(stmt)
-            await session.commit()
-            return res.scalar_one()
-
-
-class SQLAlchemyReadRepo:
-    model = None
-
-    @classmethod
-    async def get_one(cls, id):
-        async with session_maker() as session:
-            query = select(cls.model).where(cls.model.id == id)
-            res = await session.execute(query)
-            return res.scalar_one()

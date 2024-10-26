@@ -1,15 +1,16 @@
 import asyncio
+from collections import deque
 import datetime
 import logging
 import os
 
 import aiohttp
 import xlrd
-from typing import Iterator, Callable
+from typing import Iterator
 from datetype import _date as d
 import aiofiles
 
-from models import Item
+from models.models import Item
 
 
 async def write_file(filename, data):
@@ -18,12 +19,12 @@ async def write_file(filename, data):
 
 
 class Downloader:
-    def __init__(self, start: str, send_to: Callable):
+    def __init__(self, start: str):
         self.start: datetime.date = datetime.datetime.strptime(start, "%d.%m.%Y").date()
-        self.cb = send_to
         self.output_dir = "temp"
         os.makedirs("temp", exist_ok=True)
         self.process = asyncio.Queue()
+        self.output = deque()
 
     async def download(self) -> None:
         await asyncio.gather(self.produce())
@@ -48,7 +49,7 @@ class Downloader:
             if item is None:
                 break
             logging.info(f"consume...{item}")
-            await self.cb(extract_items(item))
+            self.extract_items(item)
             os.remove(item)
 
     @staticmethod
@@ -61,35 +62,39 @@ class Downloader:
                 await write_file(filename, data)
                 return filename
 
+    def extract_items(self, file: str) -> Iterator[Item]:
+        xls = xlrd.open_workbook_xls(file)
+        sheet = xls.sheet_by_index(0)
 
-def extract_items(file: str) -> Iterator[Item]:
-    xls = xlrd.open_workbook_xls(file)
-    sheet = xls.sheet_by_index(0)
+        def is_not_ordered(*args: str) -> bool:
+            return any(not i.isdigit() for i in args)
 
-    def is_not_ordered(*args: str) -> bool:
-        return any(not i.isdigit() for i in args)
+        def get_int(str_digit: str) -> int:
+            try:
+                return int(str_digit)
+            except Exception:
+                return int(float(str_digit) * 1000)
 
-    def get_int(str_digit: str) -> int:
-        try:
-            return int(str_digit)
-        except Exception:
-            return int(float(str_digit) * 1000)
+        dayresult = []
 
-    for i in range(8, sheet.nrows - 2):
-        _, id, name, basis, *tail = (sheet[i][j].value for j in range(sheet.ncols))
-        volume, total, count = tail[0], tail[1], tail[5]
-        date = datetime.datetime.strptime(file[-12:-4], "%Y%m%d").date()
-        if is_not_ordered(volume, total, count):
-            continue
-        yield Item(
-            exchange_product_id=id,
-            exchange_product_name=name.split(",")[0],
-            oil_id=id[:4],
-            delivery_basis_id=id[4:7],
-            delivery_basis_name=basis,
-            delivery_type_id=id[-1],
-            volume=get_int(volume),
-            total=get_int(total),
-            count=get_int(count),
-            date=date,
-        )
+        for i in range(8, sheet.nrows - 2):
+            _, id, name, basis, *tail = (sheet[i][j].value for j in range(sheet.ncols))
+            volume, total, count = tail[0], tail[1], tail[5]
+            date = datetime.datetime.strptime(file[-12:-4], "%Y%m%d").date()
+            if is_not_ordered(volume, total, count):
+                continue
+            dayresult.append(
+                Item(
+                    exchange_product_id=id,
+                    exchange_product_name=name.split(",")[0],
+                    oil_id=id[:4],
+                    delivery_basis_id=id[4:7],
+                    delivery_basis_name=basis,
+                    delivery_type_id=id[-1],
+                    volume=get_int(volume),
+                    total=get_int(total),
+                    count=get_int(count),
+                    date=date,
+                )
+            )
+        self.output.append(dayresult)

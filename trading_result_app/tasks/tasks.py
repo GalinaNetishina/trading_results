@@ -2,16 +2,13 @@ from celery.schedules import crontab
 from config import settings
 import requests
 from celery import Celery
-from redis import asyncio as aioredis
+from ..main import app
+
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
 
-redis = aioredis.from_url(
-    f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
-    encoding="utf8",
-    decode_responses=True,
-)
+redis = app.state.redis
 celery = Celery(
     "tasks", broker=f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/0"
 )
