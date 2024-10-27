@@ -19,8 +19,14 @@ async def write_file(filename, data):
 
 
 class Downloader:
-    def __init__(self, start: str):
-        self.start: datetime.date = datetime.datetime.strptime(start, "%d.%m.%Y").date()
+    def __init__(self, start: str = "01.01.2023"):
+        self.start: datetime.date
+        try:
+            self.start = datetime.datetime.strptime(start, "%d.%m.%Y").date()
+            if self.start > datetime.datetime.today().date():
+                raise ValueError
+        except ValueError:
+            self.start = datetime.datetime.strptime("01.01.2023", "%d.%m.%Y").date()
         self.output_dir = "temp"
         os.makedirs("temp", exist_ok=True)
         self.process = asyncio.Queue()

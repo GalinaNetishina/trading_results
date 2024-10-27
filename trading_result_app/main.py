@@ -22,7 +22,6 @@ async def lifespan(app: FastAPI):
         encoding="utf8",
         decode_responses=True,
     )
-    # await loading()
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
 
@@ -55,26 +54,3 @@ async def exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"message": exc.detail},
     )
-
-
-async def loading():
-    from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-    from database import async_engine
-    from repos import repository as r
-    from utils import Downloader
-
-    session_maker = async_sessionmaker(
-        bind=async_engine,
-        class_=AsyncSession,
-        autoflush=False,
-        autocommit=False,
-        expire_on_commit=False,
-    )
-    async with session_maker() as session:
-        after = "01.10.2024"
-        logging.debug("data loading")
-        dl = Downloader(after)
-        rep = r.WriteItemRepo(session)
-        await dl.download()
-        for dayresult in dl.output:
-            await rep.add_many(dayresult)

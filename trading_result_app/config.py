@@ -17,9 +17,7 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str
     FRONTEND_PORT: int
 
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(Path.cwd().parent, ".env-non-dev")
-    )
+    model_config = SettingsConfigDict(env_file=os.path.join(Path.cwd(), ".env-non-dev"))
 
     @property
     def DSN_postgresql_psycopg(self) -> str:
@@ -41,6 +39,17 @@ class Settings(BaseSettings):
             f"@{self.DB_HOST}:"
             f"{self.DB_PORT}/"
             f"{self.DB_NAME}"
+        )
+
+    @property
+    def TEST_DB_URL(self) -> str:
+        return (
+            f"postgresql+asyncpg://"
+            f"{self.DB_USER}:"
+            f"{self.DB_PASS}"
+            f"@{self.DB_HOST}:"
+            f"{self.DB_PORT}/"
+            f"test_db"
         )
 
 

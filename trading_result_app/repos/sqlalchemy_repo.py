@@ -37,7 +37,7 @@ class SQLAlchemyReadRepo(AbstractRepository):
             res = await session.execute(query)
             return res.scalar_one_or_none()
 
-    async def get_many(self, filters, limit, skip, order_by):
+    async def get_many(self, filters, limit, skip, order_by="self.model.id"):
         async with self.session as session:
             query = select(self.model).order_by(order_by)
             query = filters.filter(query).limit(limit).offset(skip)

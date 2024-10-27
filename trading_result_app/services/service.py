@@ -5,6 +5,7 @@ from repos.repository import ReadItemRepo, ReadDaysRepo, WriteItemRepo
 
 from utils import Downloader
 
+
 class ItemService:
     def __init__(self, session):
         self.repo = ReadItemRepo(session)
@@ -31,23 +32,23 @@ class DaysService:
 
     async def get_day(self):
         return await self.repo.get_one()
-    
-    
+
+
 class LoadService:
-    def __init__(self, session, default_start='01.10.2024'):
+    def __init__(self, session, default_start="01.10.2024"):
         self.sub_serv = DaysService(session)
         self.repo = WriteItemRepo(session)
         self.start = default_start
-        
+
     @property
     async def is_loading_needed(self):
         last_day = await self.sub_serv.get_day()
         if not last_day:
             return True
-        self.start = last_day.date.strftime('%d.%m.%Y')
+        self.start = last_day.date.strftime("%d.%m.%Y")
         return datetime.now().date() - last_day.date > timedelta(days=3)
-    
-    async def load(self):            
+
+    async def load(self):
         dl = Downloader(self.start)
         await dl.download()
         for data in dl.output:

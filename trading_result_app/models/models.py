@@ -27,7 +27,4 @@ class Item(Base):
         UniqueConstraint("exchange_product_id", "date", name="uniq_idx_day"),
     )
 
-    def __repr__(self):
-        return (
-            f"{self.date} : {self.exchange_product_name:40}| {self.count:6} договоров"
-        )
+   
