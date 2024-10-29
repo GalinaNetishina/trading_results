@@ -19,6 +19,7 @@ class TestDownloader:
         dl = Downloader(date)
         assert dl.start == default
 
+    @pytest.mark.skipif("config.getoption('--run-slow') == 'false'")
     async def test_fetch_files(self):
         date = datetime.strftime((datetime.today() - timedelta(days=5)), "%d.%m.%Y")
         dl = Downloader(date)
@@ -29,7 +30,8 @@ class TestDownloader:
                 <= datetime.strptime(file[:-4], "%Y%m%d").date()
                 <= datetime.today().date()
             )
-
+            
+    @pytest.mark.skipif("config.getoption('--run-slow') == 'false'")
     async def test_loading(self):
         date = datetime.strftime((datetime.today() - timedelta(days=5)), "%d.%m.%Y")
         dl = Downloader(date)

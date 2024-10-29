@@ -61,7 +61,7 @@ class TestApiDynamicFilters:
                 assert item[filter_name] == self.ids[values]
 
     async def test_date_filters(self, ac: AsyncClient):
-        example = await ac.get("/api/last_trading_dates/?count=5")
+        example = await ac.get("/api/last_trading_dates/?count=7")
         days = [i["date"] for i in example.json()]
         response = await ac.get(f"/api/get_dynamics/?start_date={days[2]}&limit=100")
         assert response.status_code == 200, f"{response.json()}"

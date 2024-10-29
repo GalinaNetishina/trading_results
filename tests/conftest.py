@@ -56,3 +56,10 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run-slow", 
+        default="false",
+        choices=("true", "false")
+        )
