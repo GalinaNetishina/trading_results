@@ -32,17 +32,6 @@ class TestApiTradingResultsPagination:
 
 
 class TestApiTradingResultsFilters:
-    @pytest.fixture
-    async def generate_dict_lists_ids(self, request, ac: AsyncClient):
-        examples = await ac.get("/api/get_trading_results/?limit=3")
-        basis_ids = [i["delivery_basis_id"] for i in examples.json()]
-        product_ids = [i["exchange_product_id"] for i in examples.json()]
-        types_ids = [i["delivery_type_id"] for i in examples.json()]
-        request.cls.ids = {
-            "basis_ids": basis_ids,
-            "types_ids": types_ids,
-            "product_ids": product_ids,
-    }
     @pytest.mark.parametrize(
         "filter_name, values",
         [

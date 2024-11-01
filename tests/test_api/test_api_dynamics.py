@@ -14,7 +14,7 @@ class TestApiDynamicBase:
 
 
 class TestApiDynamicPagination:
-    async def test_get_last_results_with_pagination(self, ac: AsyncClient):
+    async def test_get_dynamics_with_pagination(self, ac: AsyncClient):
         response = await ac.get("/api/get_dynamics/?limit=5")
         assert response.status_code == 200, f"{response.json()}"
         assert len(response.json()) == 5
@@ -24,21 +24,13 @@ class TestApiDynamicPagination:
         assert response.status_code == 200, f"{response.json()}"
         assert len(response.json()) == 5
         second5 = response.json()
-        response = await ac.get("/api/get_dynamics/")
+        response = await ac.get("/api/get_dynamics/?limit=10")
         for item in first5 + second5:
             ItemFull.model_validate(item)
             assert item in response.json()
 
 
 class TestApiDynamicFilters:
-    @pytest.fixture
-    async def generate_dict_ids(self, ac: AsyncClient, request):
-        examples = await ac.get("/api/get_trading_results/?limit=1")
-        request.cls.ids = dict()
-        request.cls.ids["basis_id"] = examples.json()[0]["delivery_basis_id"]
-        request.cls.ids["type_id"] = examples.json()[0]["delivery_type_id"]
-        request.cls.ids["product_id"] = examples.json()[0]["exchange_product_id"]
-        
     @pytest.mark.parametrize(
         "filter_name, values",
         [
