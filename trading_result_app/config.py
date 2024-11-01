@@ -4,6 +4,7 @@ from pathlib import Path
 
 
 class Settings(BaseSettings):
+    MODE: str
     DB_NAME: str
     DB_HOST: str
     DB_PORT: int
@@ -32,13 +33,23 @@ class Settings(BaseSettings):
 
     @property
     def DSN_postgresql_asyncpg(self) -> str:
-        return (
+        
+        if self.MODE == 'dev':
+            return (
             f"postgresql+asyncpg://"
             f"{self.DB_USER}:"
             f"{self.DB_PASS}"
             f"@{self.DB_HOST}:"
             f"{self.DB_PORT}/"
             f"{self.DB_NAME}"
+        )
+        return (
+            f"postgresql+asyncpg://"
+            f"{self.DB_USER}:"
+            f"{self.DB_PASS}"
+            f"@localhost:"
+            f"{self.DB_PORT}/"
+            f"test_db"
         )
 
     @property
@@ -47,7 +58,7 @@ class Settings(BaseSettings):
             f"postgresql+asyncpg://"
             f"{self.DB_USER}:"
             f"{self.DB_PASS}"
-            f"@{self.DB_HOST}:"
+            f"@localhost:"
             f"{self.DB_PORT}/"
             f"test_db"
         )

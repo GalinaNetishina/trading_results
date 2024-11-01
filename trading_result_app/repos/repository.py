@@ -1,5 +1,6 @@
 from sqlalchemy import desc, select
 from sqlalchemy.orm import load_only
+from sqlalchemy.sql import text
 from redis import asyncio as aioredis
 from models.models import Item
 
@@ -47,6 +48,8 @@ class ReadDaysRepo(SQLAlchemyReadRepo):
             .limit(count)
         )
         res = await self.session.execute(query)
+        name = await self.session.execute(text("select current_database()"))
+        print(name.scalar())
         return list(
             map(
                 lambda x: TradingDay.model_validate(x, from_attributes=True),

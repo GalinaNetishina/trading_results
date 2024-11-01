@@ -15,17 +15,7 @@ session_maker = async_sessionmaker(
 )
 
 
-async def get_async_session():
-    session_maker = async_sessionmaker(
-        bind=async_engine,
-        class_=AsyncSession,
-        autoflush=False,
-        autocommit=False,
-        expire_on_commit=False,
-    )
-    async with session_maker() as session:
-        yield session
-        await session.commit()
+
 
 
 # from typing import Protocol
