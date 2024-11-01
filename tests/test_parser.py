@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from datetime import datetime, timedelta
 from trading_result_app.utils import Downloader
-from trading_result_app.models.models import Item
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -30,7 +29,7 @@ class TestDownloader:
                 <= datetime.strptime(file[:-4], "%Y%m%d").date()
                 <= datetime.today().date()
             )
-            
+
     @pytest.mark.skipif("config.getoption('--run-slow') == 'false'")
     async def test_loading(self):
         date = datetime.strftime((datetime.today() - timedelta(days=5)), "%d.%m.%Y")
@@ -43,4 +42,3 @@ class TestDownloader:
         for item in dl.output.pop():
             # assert isinstance(item, Item)
             assert issubclass(type(item), DeclarativeBase)
-        

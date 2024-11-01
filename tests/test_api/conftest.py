@@ -14,6 +14,7 @@ async def generate_dict_lists_ids(request, ac: AsyncClient):
         "product_ids": product_ids,
     }
 
+
 @pytest.fixture()
 async def generate_dict_ids(ac: AsyncClient, request):
     examples = await ac.get("/api/get_trading_results/?limit=1")

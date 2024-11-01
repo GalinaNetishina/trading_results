@@ -57,9 +57,6 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
     ) as ac:
         yield ac
 
+
 def pytest_addoption(parser):
-    parser.addoption(
-        "--run-slow", 
-        default="false",
-        choices=("true", "false")
-        )
+    parser.addoption("--run-slow", default="false", choices=("true", "false"))

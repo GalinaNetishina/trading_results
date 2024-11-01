@@ -9,7 +9,7 @@ class TestApiDates:
         assert len(response.json()) <= 7
         response = await ac.get("/api/last_trading_date/")
         TradingDay.model_validate(response.json())
-        assert 'date' in response.json() 
+        assert "date" in response.json()
 
     async def test_get_dates_with_count(self, ac: AsyncClient):
         response = await ac.get("/api/last_trading_dates/?count=3")

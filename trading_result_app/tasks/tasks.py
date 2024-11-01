@@ -2,8 +2,7 @@ from celery.schedules import crontab
 from config import settings
 import requests
 from celery import Celery
-from ..main import app
-
+from main import app
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
@@ -16,7 +15,7 @@ celery = Celery(
 
 celery.conf.beat_schedule = {
     "clear_cache": {
-        "task": "tasks.refresh_cash",
+        "task": "tasks.tasks.refresh_cash",
         "schedule": crontab(hour=14, minute=11),
     },
     # "email_tick": {
